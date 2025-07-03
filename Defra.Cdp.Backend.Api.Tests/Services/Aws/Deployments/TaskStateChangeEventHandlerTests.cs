@@ -52,8 +52,13 @@ public class TaskStateChangeEventHandlerTests
         var deploymentsService = Substitute.For<IDeploymentsService>();
         var testRunService = Substitute.For<ITestRunService>();
 
+        var deployment = new Deployment
+        {
+            CdpDeploymentId = "cdp-123"
+        };
         deploymentsService.FindDeploymentByLambdaId("ecs-svc/6276605373259507742", Arg.Any<CancellationToken>())
-            .Returns(new Deployment());
+            .Returns(deployment);
+        deploymentsService.FindDeployment(deployment.CdpDeploymentId, Arg.Any<CancellationToken>()).Returns(deployment);
 
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
@@ -76,9 +81,13 @@ public class TaskStateChangeEventHandlerTests
         var deploymentsService = Substitute.For<IDeploymentsService>();
         var testRunService = Substitute.For<ITestRunService>();
 
+        var deployment = new Deployment
+        {
+            CdpDeploymentId = "cdp-123"
+        };
         deploymentsService.FindDeploymentByLambdaId("ecs-svc/6276605373259507742", Arg.Any<CancellationToken>()).ReturnsNull();
-        deploymentsService.FindDeploymentByTaskArn("arn:aws:ecs:eu-west-2:506190012364:task-definition/cdp-example-node-backend:47", Arg.Any<CancellationToken>()).Returns(new Deployment());
-
+        deploymentsService.FindDeploymentByTaskArn("arn:aws:ecs:eu-west-2:506190012364:task-definition/cdp-example-node-backend:47", Arg.Any<CancellationToken>()).Returns(deployment);
+        deploymentsService.FindDeployment(deployment.CdpDeploymentId, Arg.Any<CancellationToken>()).Returns(deployment);
 
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),

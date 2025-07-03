@@ -127,7 +127,7 @@ public class TaskStateChangeEventHandler(
         }
             
         // Limit the number of stopped service in the event of a crash-loop
-        deployment.TrimInstance(10);
+        deployment.TrimInstance(50);
 
         // update the overall status
         deployment.Status = DeploymentStatus.CalculateOverallStatus(deployment);
