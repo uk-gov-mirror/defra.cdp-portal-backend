@@ -1,17 +1,13 @@
 using System.Collections.Immutable;
 using Defra.Cdp.Backend.Api.Models;
 using Defra.Cdp.Backend.Api.Services.Deployments;
-using Defra.Cdp.Backend.Api.Services.Entities;
-using Defra.Cdp.Backend.Api.Services.Entities.Model;
 using Defra.Cdp.Backend.Api.Services.TestSuites;
-using Type = Defra.Cdp.Backend.Api.Services.Entities.Model.Type;
 
 namespace Defra.Cdp.Backend.Api.Services.Aws.Deployments;
 
 public class TaskStateChangeEventHandler(
     IEnvironmentLookup environmentLookup,
     IDeploymentsService deploymentsService,
-    IEntitiesService entitiesService,
     ITestRunService testRunService,
     ILogger<TaskStateChangeEventHandler> logger)
 {
@@ -20,34 +16,30 @@ public class TaskStateChangeEventHandler(
     public async Task Handle(string id, EcsTaskStateChangeEvent ecsTaskStateChangeEvent,
         CancellationToken cancellationToken)
     {
-        var name = ecsTaskStateChangeEvent.Detail.Group.Split(":").Last();
+        var groupParts = ecsTaskStateChangeEvent.Detail.Group.Split(":");
+        var groupType = groupParts.FirstOrDefault("").ToLower();
+        var name = groupParts.LastOrDefault("");
+        
         var env = environmentLookup.FindEnv(ecsTaskStateChangeEvent.Account);
         if (env == null)
         {
             logger.LogError(
-                "Unable to convert {DeploymentId} to a deployment event, unknown environment/account: {Account} check the mappings!",
+                "Unable to convert {DeploymentId} to a deployment event, unknown environment/account: {Account} check the mappings",
                 ecsTaskStateChangeEvent.DeploymentId, ecsTaskStateChangeEvent.Account);
             return;
         }
 
-        var entity = await entitiesService.GetEntity(name, cancellationToken);
-
-        if (entity == null)
+        switch (groupType)
         {
-            logger.LogWarning("No known entity found for task {Id}, {Name}", id, name);
-            return;
-        }
-
-        switch (entity.Type)
-        {
-            case Type.Microservice:
+            case "service":
                 await UpdateDeployment(ecsTaskStateChangeEvent, cancellationToken);
-                return;
-            case Type.TestSuite:
-                await UpdateTestSuite(ecsTaskStateChangeEvent, entity, cancellationToken);
-                return;
+                break;
+            case "family": 
+                // 'family' is set when event is from an ECS stand-alone task (i.e. no restart policy)
+                await UpdateTestSuite(ecsTaskStateChangeEvent, name, cancellationToken);
+                break;
             default:
-                logger.LogWarning("Skipping entity {Name}, unsupported type {Type}", name, entity.Type.ToString());
+                logger.LogWarning("Skipping entity {Name}, unsupported type {Type}", name, groupType);
                 break;
         }
     }
@@ -111,10 +103,12 @@ public class TaskStateChangeEventHandler(
                 new DeploymentInstanceStatus(instanceStatus, ecsTaskStateChangeEvent.Timestamp), cancellationToken);
 
             await UpdateStatus(deployment.CdpDeploymentId, ecsTaskStateChangeEvent, cancellationToken);
+            return;
         }
         catch (Exception ex)
         {
             logger.LogError("Failed to update deployment: {Message}", ex.Message);
+            return;
         }
     }
 
@@ -148,7 +142,7 @@ public class TaskStateChangeEventHandler(
     /**
      * Handle events related to a test suite. Unlike a service these are expected to run then exit.
      */
-    public async Task UpdateTestSuite(EcsTaskStateChangeEvent ecsTaskStateChangeEvent, Entity entity,
+    public async Task UpdateTestSuite(EcsTaskStateChangeEvent ecsTaskStateChangeEvent, string name,
         CancellationToken cancellationToken)
     {
         try
@@ -162,9 +156,9 @@ public class TaskStateChangeEventHandler(
             // if it's not there, find a candidate to link it to
             if (testRun == null)
             {
-                logger.LogInformation("trying to link {Id} in environment:{Env}", entity.Name, env);
+                logger.LogInformation("trying to link {Id} in environment:{Env}", name, env);
                 testRun = await testRunService.Link(
-                    new TestRunMatchIds(entity.Name, env!, ecsTaskStateChangeEvent.Timestamp),
+                    new TestRunMatchIds(name, env!, ecsTaskStateChangeEvent.Timestamp),
                     taskArn,
                     cancellationToken);
             }
@@ -177,7 +171,7 @@ public class TaskStateChangeEventHandler(
             }
 
             // use the container exit code to figure out if the tests passed. non-zero exit code == failure. 
-            var container = ecsTaskStateChangeEvent.Detail.Containers.FirstOrDefault(c => c.Name == entity.Name);
+            var container = ecsTaskStateChangeEvent.Detail.Containers.FirstOrDefault(c => c.Name == name);
             var testResults = GenerateTestSuiteStatus(container);
             var failureReasons = ExtractFailureReasons(ecsTaskStateChangeEvent);
             var taskStatus = GenerateTestSuiteTaskStatus(ecsTaskStateChangeEvent.Detail.DesiredStatus,

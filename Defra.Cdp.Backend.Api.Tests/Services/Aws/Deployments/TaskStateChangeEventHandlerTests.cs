@@ -63,7 +63,6 @@ public class TaskStateChangeEventHandlerTests
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
             deploymentsService,
-            entitiesService,
             testRunService,
             ConsoleLogger.CreateLogger<TaskStateChangeEventHandler>());
 
@@ -92,7 +91,6 @@ public class TaskStateChangeEventHandlerTests
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
             deploymentsService,
-            entitiesService,
             testRunService,
             ConsoleLogger.CreateLogger<TaskStateChangeEventHandler>());
 
@@ -119,7 +117,6 @@ public class TaskStateChangeEventHandlerTests
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
             deploymentsService,
-            entitiesService,
             testRunService,
             ConsoleLogger.CreateLogger<TaskStateChangeEventHandler>());
 

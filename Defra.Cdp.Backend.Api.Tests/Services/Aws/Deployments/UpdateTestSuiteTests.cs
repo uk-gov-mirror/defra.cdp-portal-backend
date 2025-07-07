@@ -36,13 +36,12 @@ public class UpdateTestSuiteTests
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
             _deploymentsService,
-            _entitiesService,
             _testRunService,
             new NullLogger<TaskStateChangeEventHandler>());
 
         _testRunService.FindByTaskArn(Arg.Any<string>(), Arg.Any<CancellationToken>()).ReturnsNull();
 
-        await handler.UpdateTestSuite(ecsEvent, entity, CancellationToken.None);
+        await handler.UpdateTestSuite(ecsEvent, entity.Name, CancellationToken.None);
 
         await _testRunService.DidNotReceive().UpdateStatus(
             Arg.Any<string>(),
@@ -68,7 +67,6 @@ public class UpdateTestSuiteTests
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
             _deploymentsService,
-            _entitiesService,
             _testRunService,
             new NullLogger<TaskStateChangeEventHandler>());
 
@@ -83,7 +81,7 @@ public class UpdateTestSuiteTests
             TestSuite = "forms-perf-test"
         });
 
-        await handler.UpdateTestSuite(ecsEvent, entity, CancellationToken.None);
+        await handler.UpdateTestSuite(ecsEvent, entity.Name, CancellationToken.None);
 
         await _testRunService.Received().UpdateStatus(
             ecsEvent.Detail.TaskArn,
@@ -108,7 +106,6 @@ public class UpdateTestSuiteTests
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
             _deploymentsService,
-            _entitiesService,
             _testRunService,
             new NullLogger<TaskStateChangeEventHandler>());
 
@@ -119,7 +116,7 @@ public class UpdateTestSuiteTests
                 TestSuite = "forms-perf-test"
             });
 
-        await handler.UpdateTestSuite(ecsEvent, entity, CancellationToken.None);
+        await handler.UpdateTestSuite(ecsEvent, entity.Name, CancellationToken.None);
 
         await _testRunService.Received().UpdateStatus(
             ecsEvent.Detail.TaskArn,
@@ -145,7 +142,6 @@ public class UpdateTestSuiteTests
 
             new MockEnvironmentLookup(),
             _deploymentsService,
-            _entitiesService,
             _testRunService,
             new NullLogger<TaskStateChangeEventHandler>());
 
@@ -156,7 +152,7 @@ public class UpdateTestSuiteTests
                 TestSuite = "forms-perf-test"
             });
 
-        await handler.UpdateTestSuite(ecsEvent, entity, CancellationToken.None);
+        await handler.UpdateTestSuite(ecsEvent, entity.Name, CancellationToken.None);
 
         await _testRunService.Received().UpdateStatus(
             ecsEvent.Detail.TaskArn,
@@ -182,7 +178,6 @@ public class UpdateTestSuiteTests
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
             _deploymentsService,
-            _entitiesService,
             _testRunService,
             new NullLogger<TaskStateChangeEventHandler>());
 
@@ -193,7 +188,7 @@ public class UpdateTestSuiteTests
                 TestSuite = "forms-perf-test"
             });
 
-        await handler.UpdateTestSuite(ecsEvent, entity, CancellationToken.None);
+        await handler.UpdateTestSuite(ecsEvent, entity.Name, CancellationToken.None);
 
         await _testRunService.Received().UpdateStatus(
             ecsEvent.Detail.TaskArn,
@@ -219,7 +214,6 @@ public class UpdateTestSuiteTests
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
             _deploymentsService,
-            _entitiesService,
             _testRunService,
             new NullLogger<TaskStateChangeEventHandler>());
 
@@ -230,7 +224,7 @@ public class UpdateTestSuiteTests
                 TestSuite = "forms-perf-test"
             });
 
-        await handler.UpdateTestSuite(ecsEvent, entity, CancellationToken.None);
+        await handler.UpdateTestSuite(ecsEvent, entity.Name, CancellationToken.None);
 
         await _testRunService.Received().UpdateStatus(
             ecsEvent.Detail.TaskArn,
@@ -255,7 +249,6 @@ public class UpdateTestSuiteTests
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
             _deploymentsService,
-            _entitiesService,
             _testRunService,
             new NullLogger<TaskStateChangeEventHandler>());
 
@@ -266,7 +259,7 @@ public class UpdateTestSuiteTests
                 TestSuite = "forms-perf-test"
             });
 
-        await handler.UpdateTestSuite(ecsEvent, entity, CancellationToken.None);
+        await handler.UpdateTestSuite(ecsEvent, entity.Name, CancellationToken.None);
 
         await _testRunService.Received().UpdateStatus(
             ecsEvent.Detail.TaskArn,
@@ -295,7 +288,6 @@ public class UpdateTestSuiteTests
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
             _deploymentsService,
-            _entitiesService,
             _testRunService,
             new NullLogger<TaskStateChangeEventHandler>());
 
@@ -306,7 +298,7 @@ public class UpdateTestSuiteTests
                 TestSuite = "forms-perf-test"
             });
 
-        await handler.UpdateTestSuite(ecsEvent, entity, CancellationToken.None);
+        await handler.UpdateTestSuite(ecsEvent, entity.Name, CancellationToken.None);
 
         await _testRunService.Received().UpdateStatus(
             ecsEvent.Detail.TaskArn,
@@ -332,7 +324,6 @@ public class UpdateTestSuiteTests
         var handler = new TaskStateChangeEventHandler(
             new MockEnvironmentLookup(),
             _deploymentsService,
-            _entitiesService,
             _testRunService,
             new NullLogger<TaskStateChangeEventHandler>());
 
@@ -343,7 +334,7 @@ public class UpdateTestSuiteTests
                 TestSuite = "forms-perf-test"
             });
 
-        await handler.UpdateTestSuite(ecsEvent, entity, CancellationToken.None);
+        await handler.UpdateTestSuite(ecsEvent, entity.Name, CancellationToken.None);
 
         await _testRunService.Received().UpdateStatus(
             ecsEvent.Detail.TaskArn,
